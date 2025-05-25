@@ -1,0 +1,13 @@
+{
+  "include": ["../mod.ts"],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "NodeNext",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../dist",
+    "outFile": "html.d.ts"
+  }
+}

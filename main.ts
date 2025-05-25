@@ -1,4 +1,4 @@
-import { component, html, block } from "./html.ts";
+import { block, component, html } from "./mod.ts";
 
 const Layout = component((h) => {
   // deno-fmt-ignore
@@ -31,38 +31,39 @@ const P = component<{ text: string; color?: string }>((_, props) => {
   return html`
     <p style="color: ${props?.color ?? "black"}">
       ${props?.text ??
-      "No text provided"}
+    "No text provided"}
     </p>
   `;
 });
 
 const page = () => {
   // deno-fmt-ignore
-  return html`
-    ${Layout.open()} 
+  return Layout.html`
 
-        ${block('head', html`
-            <title>Hello from home</title>
+      ${block('head', html`
+          <title>Hello from home</title>
+      `)}
+
+      ${block('content', html`
+            <h1>Home page</h1>
+            <p>Paragraph from home page</p>
+            
+            ${P.render({ text: "Hi from void component", color: "red" })}
+
+            ${Card.open({ color: "green" })}
+              <p>Hi there! <strong>Emmet works</strong></p>
+            ${Card.close()} 
+            
+            ${Card.with({ color: "blue" }, (c) => c.html`
+              <p>Hi there with <code>with</code> statement</p>
+            `)}
         `)}
+     
 
-        ${block('content', html`
-              <h1>Home page</h1>
-              <p>Paragraph from home page</p>
-
-              ${P.render({ text: "Hi from void component", color: "red" })}
-
-              ${html`
-                  ${Card.open({ color: "green" })}
-                    <p>Hi there</p>
-                  ${Card.close()}
-              `} 
-          `)}
-
-        ${block('scripts', html`
-            <script>console.log("hi from home")</script>
-        `)}
-    ${Layout.close()}
-  `;
+      ${block('scripts', html`
+          <script>console.log("hi from home")</script>
+      `)}
+  `
 };
 
 Deno.serve(() =>
