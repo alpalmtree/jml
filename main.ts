@@ -1,5 +1,7 @@
 import { block, component, html } from "./mod.ts";
 
+import { serveDir } from "jsr:@std/http/file-server";
+
 const Layout = component((h) => {
   // deno-fmt-ignore
   return html`
@@ -36,19 +38,27 @@ const P = component<{ text: string; color?: string }>((_, props) => {
   `;
 });
 
+const on = (eventName: string, cb: () => void) => {
+
+}
+
 const page = () => {
   // deno-fmt-ignore
   return Layout.html`
 
       ${block('head', html`
           <title>Hello from home</title>
+          <script type="module" src="/static/index.js"></script>
       `)}
 
       ${block('content', html`
             <h1>Home page</h1>
             <p>Paragraph from home page</p>
-            
+
+            <button ${on('click', () => {})}></button>
+
             ${P.render({ text: "Hi from void component", color: "red" })}
+
 
             ${Card.open({ color: "green" })}
               <p>Hi there! <strong>Emmet works</strong></p>
@@ -61,15 +71,24 @@ const page = () => {
      
 
       ${block('scripts', html`
-          <script>console.log("hi from home")</script>
+          <script></script>
       `)}
   `
 };
 
-Deno.serve(() =>
-  new Response(page().string, {
+Deno.serve((req) => {
+  const pathname = new URL(req.url).pathname;
+ if (pathname.startsWith("/static")) {
+
+    return serveDir(req, {
+      fsRoot: "public",
+      urlRoot: "static",
+    });
+  }
+  return new Response(page().string, {
     headers: {
       "content-type": "html; charset=utf-8",
     },
   })
+}
 );

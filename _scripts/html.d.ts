@@ -1,16 +1,15 @@
 declare module "src/html" {
-    const helpers: {
+    type Helpers = {
         block: (name: string) => string;
         children: () => string;
     };
-    type Helpers = typeof helpers;
     class ComponentOpeningTag<T = unknown> {
         instance: Component<T>;
         constructor(instance: Component<T>);
     }
     class ClosingTag {
     }
-    class TemplateStringReturnValue {
+    export class TemplateStringReturnValue {
         string: string;
         constructor(string: string);
     }
@@ -49,5 +48,5 @@ declare module "src/html" {
     export const html: (strings: TemplateStringsArray, ...args: unknown[]) => TemplateStringReturnValue;
 }
 declare module "mod" {
-    export { block, component, html, raw } from "src/html";
+    export * from "src/html";
 }
