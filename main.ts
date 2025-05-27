@@ -38,9 +38,6 @@ const P = component<{ text: string; color?: string }>((_, props) => {
   `;
 });
 
-const on = (eventName: string, cb: () => void) => {
-
-}
 
 const page = () => {
   // deno-fmt-ignore
@@ -55,8 +52,6 @@ const page = () => {
             <h1>Home page</h1>
             <p>Paragraph from home page</p>
 
-            <button ${on('click', () => {})}></button>
-
             ${P.render({ text: "Hi from void component", color: "red" })}
 
 
@@ -67,6 +62,7 @@ const page = () => {
             ${Card.with({ color: "blue" }, (c) => c.html`
               <p>Hi there with <code>with</code> statement</p>
             `)}
+            <counter-component></counter-component>
         `)}
      
 
