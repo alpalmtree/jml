@@ -6,9 +6,9 @@ type Helpers = {
     children: () => string;
 };
 
-class ComponentOpeningTag<T = unknown> {
+class MacroOpeningTag<T = unknown> {
   constructor(
-    public instance: Component<T>,
+    public instance: Macro<T>,
   ) {}
 }
 
@@ -35,38 +35,38 @@ class Block {
 
 const transform = (
   arg: unknown,
-  internals: { currentComponent: Component | null },
+  internals: { currentMacro: Macro | null },
 ): string => {
-  if (arg instanceof ComponentOpeningTag) {
-    internals.currentComponent = arg.instance;
-    return internals.currentComponent.hasChildren
-      ? internals.currentComponent.enclosing.start
+  if (arg instanceof MacroOpeningTag) {
+    internals.currentMacro = arg.instance;
+    return internals.currentMacro.hasChildren
+      ? internals.currentMacro.enclosing.start
       : "";
   }
 
   if (arg instanceof Block) {
-    if (!internals.currentComponent) {
-      console.error("Cannot use block without opening component");
+    if (!internals.currentMacro) {
+      console.error("Cannot use block without opening macro");
       return "";
     }
-    internals.currentComponent.blocks.set(arg.name, arg.content.string);
+    internals.currentMacro.blocks.set(arg.name, arg.content.string);
     return "";
   }
 
   if (arg instanceof ClosingTag) {
-    if (internals.currentComponent && internals.currentComponent.hasChildren) {
-      return internals.currentComponent?.enclosing.end;
+    if (internals.currentMacro && internals.currentMacro.hasChildren) {
+      return internals.currentMacro?.enclosing.end;
     }
 
-    const blocks = internals.currentComponent!.blocks;
-    const template = internals.currentComponent!.template;
-    let componentString = template;
+    const blocks = internals.currentMacro!.blocks;
+    const template = internals.currentMacro!.template;
+    let macroString = template;
     blocks.forEach((value, key) => {
-      componentString = componentString.replace(`@__block:${key}`, value);
+      macroString = macroString.replace(`@__block:${key}`, value);
     });
 
-    internals.currentComponent = null;
-    return componentString;
+    internals.currentMacro = null;
+    return macroString;
   }
 
   if (arg instanceof TemplateStringReturnValue) return arg.string;
@@ -81,8 +81,8 @@ const TemplateStringBuilder = (
   strings: TemplateStringsArray,
   ...args: unknown[]
 ): TemplateStringReturnValue => {
-  const internals: { currentComponent: Component | null } = {
-    currentComponent: null,
+  const internals: { currentMacro: Macro | null } = {
+    currentMacro: null,
   };
 
   let final: string = "";
@@ -98,7 +98,7 @@ const TemplateStringBuilder = (
   return new TemplateStringReturnValue(final);
 };
 
-class Component<T = unknown> {
+class Macro<T = unknown> {
   public template: string;
   public renderString: string = "";
   public enclosing = {
@@ -133,21 +133,21 @@ class Component<T = unknown> {
   }
 
   public render(props?: T) {
-    const instance = new Component(this.templateFunction, props);
+    const instance = new Macro(this.templateFunction, props);
     return raw(instance.template);
   }
 
   public open(props?: T) {
     const instance = this.props
       ? this
-      : new Component(this.templateFunction, props);
+      : new Macro(this.templateFunction, props);
 
     if (this.hasChildren) {
       const splitted = instance.template.split("@__children");
       instance.enclosing.start = splitted.at(0)!;
       instance.enclosing.end = splitted.at(-1)!;
     }
-    return new ComponentOpeningTag(instance);
+    return new MacroOpeningTag(instance);
   }
   public close() {
     return new ClosingTag();
@@ -161,17 +161,17 @@ class Component<T = unknown> {
 
   public with(
     props: T,
-    callback: (component: Component<T>) => TemplateStringReturnValue,
+    callback: (macro: Macro<T>) => TemplateStringReturnValue,
   ) {
-    const instance = new Component(this.templateFunction, props);
+    const instance = new Macro(this.templateFunction, props);
     return callback(instance);
   }
 }
 
-export const component = <T>(
+export const macro = <T>(
   cb: (helpers: Helpers, props?: T) => TemplateStringReturnValue,
 ) => {
-  return new Component<T>(cb, undefined);
+  return new Macro<T>(cb, undefined);
 };
 
 export const raw = (str: string) => new RawString(str);

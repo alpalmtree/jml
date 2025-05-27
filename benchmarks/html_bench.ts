@@ -1,5 +1,5 @@
-import { block, component, html } from "../src/html.ts";
-const Layout = component((h) => {
+import { block, macro, html } from "../src/html.ts";
+const Layout = macro((h) => {
   // deno-fmt-ignore
   return html`
     <!DOCTYPE html>
@@ -17,16 +17,16 @@ const Layout = component((h) => {
   `;
 });
 
-const Card = component<{ color: string }>((h, props) => {
+const Card = macro<{ color: string }>((h, props) => {
   return html`
     <div class="card" style="border: 1px solid ${props?.color ?? "red"}">
       ${h.children()}
-      <p>I'm inside the card component layout. Color: ${props?.color}</p>
+      <p>I'm inside the card macro layout. Color: ${props?.color}</p>
     </div>
   `;
 });
 
-const P = component<{ text: string; color?: string }>((_, props) => {
+const P = macro<{ text: string; color?: string }>((_, props) => {
   return html`
     <p style="color: ${props?.color ?? "black"}">
       ${props?.text ??
@@ -47,7 +47,7 @@ const page = () => {
             <h1>Home page</h1>
             <p>Paragraph from home page</p>
             
-            ${P.render({ text: "Hi from void component", color: "red" })}
+            ${P.render({ text: "Hi from void macro", color: "red" })}
 
             ${Card.open({ color: "green" })}
               <p>Hi there! <strong>Emmet works</strong></p>
@@ -65,7 +65,7 @@ const page = () => {
   `
 };
 Deno.bench(
-  "html with components",
+  "html with macros",
   { group: "rendering", baseline: true },
   () => {
     page().string;

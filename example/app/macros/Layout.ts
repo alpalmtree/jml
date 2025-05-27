@@ -1,0 +1,18 @@
+import { macro, html } from "../../../mod.ts";
+
+export default macro((h) => {
+  // deno-fmt-ignore
+  return html`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        ${h.block("head")}
+      </head>
+      <body>
+        ${h.block("content")} 
+      </body>
+    </html>
+  `;
+});

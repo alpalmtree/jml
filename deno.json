@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run -A --watch main.ts",
+    "dev": "deno run -A --watch example/app/main.ts",
     "build": "deno run -A _scripts/build.ts && tsc -p _scripts/tsconfig.json"
   },
   "compilerOptions": {

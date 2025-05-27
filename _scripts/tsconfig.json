@@ -8,6 +8,6 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "../dist",
-    "outFile": "html.d.ts"
+    "outFile": "../dist/html.d.ts"
   }
 }

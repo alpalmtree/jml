@@ -48,7 +48,7 @@ function Page() {
       <h1>Hi</h1>
       <h1>Home page</h1>
       <p>Paragraph from home page</p>
-      <P text="Hi from void component" color="green" />
+      <P text="Hi from void macro" color="green" />
 
       <Card color="green">
         <p>Hi there</p>
@@ -59,6 +59,6 @@ function Page() {
     </Layout>
   );
 }
-Deno.bench("preact jsx with components", { group: "rendering" }, () => {
+Deno.bench("preact jsx with macros", { group: "rendering" }, () => {
   render(<Page />);
 });
