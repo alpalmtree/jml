@@ -14,11 +14,18 @@ class MacroOpeningTag<T = unknown> {
 
 class ClosingTag {}
 
-export class TemplateStringReturnValue {
-  constructor(
-    public string: string,
-  ) {}
+// export class TemplateStringReturnValue {
+//   constructor(
+//     public string: string,
+//   ) {}
+// }
+
+const templateStringReturnValueSymbol = Symbol('return_value')
+export type TemplateStringReturnValue = {
+  string: string,
+  [templateStringReturnValueSymbol]: boolean
 }
+
 
 class RawString {
   constructor(
@@ -69,7 +76,7 @@ const transform = (
     return macroString;
   }
 
-  if (arg instanceof TemplateStringReturnValue) return arg.string;
+  if (arg && typeof arg === 'object' && templateStringReturnValueSymbol in (arg as TemplateStringReturnValue)) return ((arg as TemplateStringReturnValue)).string;
   if (typeof arg === "string") return escape(arg);
   if (arg instanceof RawString) return arg.value;
   if (Array.isArray(arg)) return arg.join("");
@@ -95,7 +102,7 @@ const TemplateStringBuilder = (
     final += currentString;
   }
 
-  return new TemplateStringReturnValue(final);
+  return { string: final, [templateStringReturnValueSymbol]: true};
 };
 
 class Macro<T = unknown> {

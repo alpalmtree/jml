@@ -54,6 +54,13 @@ Deno.bench(
   },
 );
 
+Deno.bench("creating plain object without constructor", { group: "creating" }, () => {
+    new Array(1000).fill(null).map((_, i) => ({
+      value: i,
+      [closingTagSymbol]: true
+    }));
+})
+
 class ClosingTag {}
 const closingTagSymbol = Symbol('closing_tag')
 
