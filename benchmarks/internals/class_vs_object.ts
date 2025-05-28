@@ -1,3 +1,10 @@
+/**
+ * We are using classes in the source code only to determine
+ * if a certain object is "an instance of". As it turns out,
+ * it is faster to declare a class than creating an object
+ * and assigning a symbol.
+ */
+
 class Person {
   constructor(
     public name: string,

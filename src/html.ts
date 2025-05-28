@@ -1,4 +1,4 @@
-//@ts-ignore tsc won't find this
+//@ts-ignore tsc cannot recognize this type of imports
 import { escape } from "jsr:@std/html";
 
 type Helpers = {
@@ -154,6 +154,7 @@ class Macro<T = unknown> {
   }
 
   public html(strings: TemplateStringsArray, ...args: unknown[]) {
+    
     const _strings = ["", ...strings, ""] as unknown as TemplateStringsArray;
     const _args = [this.open(), ...args, this.close()];
     return TemplateStringBuilder(_strings, ..._args);

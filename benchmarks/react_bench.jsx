@@ -1,5 +1,4 @@
 /** @jsxImportSource react */
-import { renderToString } from "react-dom/server";
 // Naive implementation, as elements will be scaped
 function Layout(
   { head, children, scripts },
@@ -39,7 +38,7 @@ function P({ text, color }) {
   );
 }
 
-function Page() {
+export default function Page() {
   return (
     <Layout
       head={<title>Home Page</title>}
@@ -59,6 +58,3 @@ function Page() {
     </Layout>
   );
 }
-Deno.bench("react jsx with macros", { group: "rendering" }, () => {
-  renderToString(<Page />);
-});

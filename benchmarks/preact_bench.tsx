@@ -1,5 +1,5 @@
 /** @jsxImportSource preact */
-import { render } from "preact-render-to-string";
+
 // Naive implementation, as elements will be scaped
 function Layout(
   { head, children, scripts }: { head: any; children: any; scripts: any },
@@ -39,7 +39,7 @@ function P({ text, color }: { text?: string; color?: string }) {
   );
 }
 
-function Page() {
+export default function Page() {
   return (
     <Layout
       head={<title>Home Page</title>}
@@ -59,6 +59,3 @@ function Page() {
     </Layout>
   );
 }
-Deno.bench("preact jsx with macros", { group: "rendering" }, () => {
-  render(<Page />);
-});

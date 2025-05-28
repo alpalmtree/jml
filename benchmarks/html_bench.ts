@@ -64,10 +64,5 @@ const page = () => {
       `)}
   `
 };
-Deno.bench(
-  "html with macros",
-  { group: "rendering", baseline: true },
-  () => {
-    page().string;
-  },
-);
+
+export default page
