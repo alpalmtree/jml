@@ -2,8 +2,8 @@
 import { escape } from "jsr:@std/html";
 
 type Helpers = {
-    block: (name: string) => string;
-    children: () => string;
+  block: (name: string) => string;
+  children: () => string;
 };
 
 class MacroOpeningTag<T = unknown> {
@@ -19,7 +19,6 @@ export class TemplateStringReturnValue {
     public string: string,
   ) {}
 }
-
 
 class RawString {
   constructor(
@@ -155,7 +154,6 @@ class Macro<T = unknown> {
   }
 
   public html(strings: TemplateStringsArray, ...args: unknown[]) {
-    
     const _strings = ["", ...strings, ""] as unknown as TemplateStringsArray;
     const _args = [this.open(), ...args, this.close()];
     return TemplateStringBuilder(_strings, ..._args);

@@ -17,11 +17,11 @@ Deno.bench(
   },
 );
 
-Deno.bench("preact jsx with macros", { group: "rendering" }, () => {
+Deno.bench("preact jsx with components", { group: "rendering" }, () => {
   render(preact());
 });
 
-Deno.bench("react jsx with macros", { group: "rendering" }, () => {
+Deno.bench("react jsx with components", { group: "rendering" }, () => {
   renderToString(react());
 });
 

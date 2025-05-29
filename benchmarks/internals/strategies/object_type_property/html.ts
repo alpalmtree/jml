@@ -1,52 +1,48 @@
 //@ts-ignore tsc cannot recognize this type of imports
 import { escape } from "jsr:@std/html";
 
+type objectType = "block" | "macro_opening_tag" | "macro_closing_tag" | "raw_string" | "template_string_return_value"
+type internalObject = {
+  __type: objectType
+}
+
 type Helpers = {
   block: (name: string) => string;
   children: () => string;
 };
 
-const macroOpeningTagSymbol = Symbol("macro_opening_tag");
 type MacroOpeningTag<T = unknown> = {
   instance: Macro<T>;
-  [macroOpeningTagSymbol]: boolean;
-};
+} & internalObject;
 
-const closingTagSymbol = Symbol("closing_tag");
-type ClosingTag = { [closingTagSymbol]: boolean };
+type ClosingTag = { __type: objectType };
 
-const templateStringReturnValueSymbol = Symbol("return_value");
 export type TemplateStringReturnValue = {
   string: string;
-  [templateStringReturnValueSymbol]: boolean;
-};
+} & internalObject;
 
-const rawStringSymbol = Symbol("raw_string");
 type RawString = {
   value: string;
-  [rawStringSymbol]: boolean;
-};
+} & internalObject;
 
-const blockSymbol = Symbol("block");
 type Block = {
   name: string;
   content: TemplateStringReturnValue;
-  [blockSymbol]: boolean;
-};
+} & internalObject;
 
 const transform = (
   arg: unknown,
   internals: { currentMacro: Macro | null },
 ): string => {
-  if (arg && typeof arg === "object") {
-    if (macroOpeningTagSymbol in arg) {
+  if (arg && typeof arg === "object" && "__type" in arg) {
+    if ((arg as internalObject).__type === "macro_opening_tag") {
       internals.currentMacro = (arg as MacroOpeningTag).instance;
       return internals.currentMacro.hasChildren
         ? internals.currentMacro.enclosing.start
         : "";
     }
 
-    if (blockSymbol in arg) {
+    if ((arg as internalObject).__type === "block") {
       if (!internals.currentMacro) {
         console.error("Cannot use block without opening macro");
         return "";
@@ -58,7 +54,7 @@ const transform = (
       return "";
     }
 
-    if (closingTagSymbol in arg) {
+    if ((arg as internalObject).__type === "macro_closing_tag") {
       if (internals.currentMacro && internals.currentMacro.hasChildren) {
         return internals.currentMacro?.enclosing.end;
       }
@@ -75,9 +71,9 @@ const transform = (
     }
 
     if (
-      templateStringReturnValueSymbol in arg
+      (arg as internalObject).__type === "template_string_return_value"
     ) return (arg as TemplateStringReturnValue).string;
-    if (rawStringSymbol in arg) {
+    if ((arg as internalObject).__type === "raw_string") {
       return (arg as RawString).value;
     }
   }
@@ -107,7 +103,7 @@ const TemplateStringBuilder = (
     final += currentString;
   }
 
-  return { string: final, [templateStringReturnValueSymbol]: true };
+  return { string: final, __type: "template_string_return_value" };
 };
 
 class Macro<T = unknown> {
@@ -159,10 +155,10 @@ class Macro<T = unknown> {
       instance.enclosing.start = splitted.at(0)!;
       instance.enclosing.end = splitted.at(-1)!;
     }
-    return { instance, [macroOpeningTagSymbol]: true };
+    return { instance, __type: "macro_opening_tag" };
   }
   public close(): ClosingTag {
-    return { [closingTagSymbol]: true };
+    return { __type: "macro_closing_tag" };
   }
 
   public html(strings: TemplateStringsArray, ...args: unknown[]) {
@@ -188,12 +184,12 @@ export const macro = <T>(
 
 export const raw = (value: string): RawString => ({
   value,
-  [rawStringSymbol]: true,
+  __type: "raw_string"
 });
 export const block = (
   name: string,
   content: TemplateStringReturnValue,
-): Block => ({ name, content, [blockSymbol]: true });
+): Block => ({ name, content, __type: "block" });
 
 export const html = (
   strings: TemplateStringsArray,

@@ -1,5 +1,6 @@
 import htmlWithClasses from "./classes/page.ts"
 import htmlWithSymbols from "./symbols/page.ts"
+import htmlWithProperties from "./object_type_property/page.ts"
 
 Deno.bench(
   "html with classes",
@@ -13,5 +14,13 @@ Deno.bench(
   { group: "rendering" },
   () => {
     htmlWithSymbols().string;
+  },
+);
+
+Deno.bench(
+  "html with properties",
+  { group: "rendering" },
+  () => {
+    htmlWithProperties().string;
   },
 );

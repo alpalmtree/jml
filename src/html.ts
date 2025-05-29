@@ -2,8 +2,8 @@
 import { escape } from "jsr:@std/html";
 
 type Helpers = {
-    block: (name: string) => string;
-    children: () => string;
+  block: (name: string) => string;
+  children: () => string;
 };
 
 class MacroOpeningTag<T = unknown> {
@@ -14,18 +14,11 @@ class MacroOpeningTag<T = unknown> {
 
 class ClosingTag {}
 
-// export class TemplateStringReturnValue {
-//   constructor(
-//     public string: string,
-//   ) {}
-// }
-
-const templateStringReturnValueSymbol = Symbol('return_value')
-export type TemplateStringReturnValue = {
-  string: string,
-  [templateStringReturnValueSymbol]: boolean
+export class TemplateStringReturnValue {
+  constructor(
+    public string: string,
+  ) {}
 }
-
 
 class RawString {
   constructor(
@@ -76,7 +69,7 @@ const transform = (
     return macroString;
   }
 
-  if (arg && typeof arg === 'object' && templateStringReturnValueSymbol in (arg as TemplateStringReturnValue)) return ((arg as TemplateStringReturnValue)).string;
+  if (arg instanceof TemplateStringReturnValue) return arg.string;
   if (typeof arg === "string") return escape(arg);
   if (arg instanceof RawString) return arg.value;
   if (Array.isArray(arg)) return arg.join("");
@@ -102,7 +95,7 @@ const TemplateStringBuilder = (
     final += currentString;
   }
 
-  return { string: final, [templateStringReturnValueSymbol]: true};
+  return new TemplateStringReturnValue(final);
 };
 
 class Macro<T = unknown> {
@@ -161,7 +154,6 @@ class Macro<T = unknown> {
   }
 
   public html(strings: TemplateStringsArray, ...args: unknown[]) {
-    
     const _strings = ["", ...strings, ""] as unknown as TemplateStringsArray;
     const _args = [this.open(), ...args, this.close()];
     return TemplateStringBuilder(_strings, ..._args);
