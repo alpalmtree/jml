@@ -13,7 +13,7 @@ Deno.bench(
   "html with macros",
   { group: "rendering", baseline: true },
   () => {
-    html().string;
+    html().toString();
   },
 );
 

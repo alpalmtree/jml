@@ -17,6 +17,7 @@ export default function Index() {
             <p>Paragraph from home page</p>
 
             ${Paragraph.render({ text: "Hi from void macro", color: "red" })}
+            ${Paragraph.render({ text: "<h1>should be escaped</h1>", color: "orange" })}
 
 
             ${Card.open({ color: "green" })}

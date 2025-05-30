@@ -11,7 +11,7 @@ Deno.serve((req) => {
       urlRoot: "static",
     });
   }
-  return new Response(Index().string, {
+  return new Response(Index().toString(), {
     headers: {
       "content-type": "html; charset=utf-8",
     },

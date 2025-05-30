@@ -1,13 +1,18 @@
 //@ts-ignore tsc cannot recognize this type of imports
 import { escape } from "jsr:@std/html";
 
-type objectType = "block" | "macro_opening_tag" | "macro_closing_tag" | "raw_string" | "template_string_return_value"
+type objectType =
+  | "block"
+  | "macro_opening_tag"
+  | "raw_string"
+  | "macro_closing_tag"
+  | "template_string_return_value";
 type internalObject = {
-  __type: objectType
-}
+  __type: objectType;
+};
 
 type Helpers = {
-  block: (name: string) => string;
+  block: (name: string) => string | TemplateStringReturnValue;
   children: () => string;
 };
 
@@ -15,14 +20,14 @@ type MacroOpeningTag<T = unknown> = {
   instance: Macro<T>;
 } & internalObject;
 
+type RawString = {
+  value: string,
+} & internalObject
+
 type ClosingTag = { __type: objectType };
 
 export type TemplateStringReturnValue = {
-  string: string;
-} & internalObject;
-
-type RawString = {
-  value: string;
+  toString: () => string;
 } & internalObject;
 
 type Block = {
@@ -34,6 +39,11 @@ const transform = (
   arg: unknown,
   internals: { currentMacro: Macro | null },
 ): string => {
+
+  if (typeof arg === 'string') return escape(arg)
+  if (Array.isArray(arg)) return arg.join("");
+
+
   if (arg && typeof arg === "object" && "__type" in arg) {
     if ((arg as internalObject).__type === "macro_opening_tag") {
       internals.currentMacro = (arg as MacroOpeningTag).instance;
@@ -49,7 +59,7 @@ const transform = (
       }
       internals.currentMacro.blocks.set(
         (arg as Block).name,
-        (arg as Block).content.string,
+        (arg as Block).content,
       );
       return "";
     }
@@ -59,28 +69,22 @@ const transform = (
         return internals.currentMacro?.enclosing.end;
       }
 
-      const blocks = internals.currentMacro!.blocks;
-      const template = internals.currentMacro!.template;
-      let macroString = template;
-      blocks.forEach((value, key) => {
-        macroString = macroString.replace(`@__block:${key}`, value);
-      });
+      const template = internals.currentMacro!.templateFunction(
+        internals.currentMacro!.helpers,
+        internals.currentMacro!.props,
+      ).toString();
 
       internals.currentMacro = null;
-      return macroString;
+      return template;
     }
-
+    if (
+      arg.__type === "raw_string" 
+    ) return (arg as RawString).value
     if (
       (arg as internalObject).__type === "template_string_return_value"
-    ) return (arg as TemplateStringReturnValue).string;
-    if ((arg as internalObject).__type === "raw_string") {
-      return (arg as RawString).value;
-    }
+    ) return (arg as TemplateStringReturnValue).toString();
   }
 
-  if (typeof arg === "string") return escape(arg);
-
-  if (Array.isArray(arg)) return arg.join("");
 
   return arg as string;
 };
@@ -93,21 +97,24 @@ const TemplateStringBuilder = (
     currentMacro: null,
   };
 
-  let final: string = "";
-  // Much faster than any other method
-  for (let index = 0; index < strings.length; index++) {
-    const currentArg = args[index] ?? "";
-    const transformedValue = transform(currentArg, internals);
-    const currentString = strings[index] + transformedValue;
+  return {
+    toString: () => {
+      let final: string = "";
+      for (let index = 0; index < strings.length; index++) {
+        const currentArg = args[index] ?? "";
+        const transformedValue = transform(currentArg, internals);
+        const currentString = strings[index] + transformedValue;
 
-    final += currentString;
-  }
-
-  return { string: final, __type: "template_string_return_value" };
+        final += currentString;
+      }
+      return final;
+    },
+    __type: "template_string_return_value",
+  };
 };
 
 class Macro<T = unknown> {
-  public template: string;
+  public template: TemplateStringReturnValue;
   public renderString: string = "";
   public enclosing = {
     start: "",
@@ -117,12 +124,12 @@ class Macro<T = unknown> {
   public hasBlocks = false;
   public hasChildren = false;
 
-  public blocks = new Map<string, string>();
+  public blocks = new Map<string, TemplateStringReturnValue>();
 
   public helpers: Helpers = {
-    block: (name: string): string => {
+    block: (name: string): string | TemplateStringReturnValue => {
       this.hasBlocks = true;
-      return `@__block:${name}`;
+      return this.blocks.get(name) ?? `@__block:${name}`;
     },
     children: () => {
       this.hasChildren = true;
@@ -135,14 +142,14 @@ class Macro<T = unknown> {
       helpers: Helpers,
       props?: T,
     ) => TemplateStringReturnValue,
-    private props?: T,
+    public props?: T,
   ) {
-    this.template = this.templateFunction(this.helpers, this.props).string;
+    this.template = this.templateFunction(this.helpers, this.props);
   }
 
   public render(props?: T) {
     const instance = new Macro(this.templateFunction, props);
-    return raw(instance.template);
+    return raw(instance.template.toString());
   }
 
   public open(props?: T): MacroOpeningTag<T> {
@@ -151,7 +158,7 @@ class Macro<T = unknown> {
       : new Macro(this.templateFunction, props);
 
     if (this.hasChildren) {
-      const splitted = instance.template.split("@__children");
+      const splitted = instance.template.toString().split("@__children");
       instance.enclosing.start = splitted.at(0)!;
       instance.enclosing.end = splitted.at(-1)!;
     }
@@ -182,14 +189,12 @@ export const macro = <T>(
   return new Macro<T>(cb, undefined);
 };
 
-export const raw = (value: string): RawString => ({
-  value,
-  __type: "raw_string"
-});
 export const block = (
   name: string,
   content: TemplateStringReturnValue,
 ): Block => ({ name, content, __type: "block" });
+
+export const raw = (value: string): RawString => ({ value, __type: "raw_string"})
 
 export const html = (
   strings: TemplateStringsArray,

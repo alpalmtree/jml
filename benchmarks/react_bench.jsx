@@ -48,6 +48,7 @@ export default function Page() {
       <h1>Home page</h1>
       <p>Paragraph from home page</p>
       <P text="Hi from void macro" color="green" />
+      <P text="<h1>Should be escaped</h1>" color="orange" />
 
       <Card color="green">
         <p>Hi there</p>
