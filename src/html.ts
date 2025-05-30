@@ -12,7 +12,7 @@ type internalObject = {
 };
 
 type Helpers = {
-  block: (name: string) => string | TemplateStringReturnValue;
+  block: (name: string) => null | TemplateStringReturnValue;
   children: () => string;
 };
 
@@ -21,8 +21,8 @@ type MacroOpeningTag<T = unknown> = {
 } & internalObject;
 
 type RawString = {
-  value: string,
-} & internalObject
+  value: string;
+} & internalObject;
 
 type ClosingTag = { __type: objectType };
 
@@ -39,20 +39,18 @@ const transform = (
   arg: unknown,
   internals: { currentMacro: Macro | null },
 ): string => {
-
-  if (typeof arg === 'string') return escape(arg)
+  if (typeof arg === "string") return escape(arg);
   if (Array.isArray(arg)) return arg.join("");
 
-
   if (arg && typeof arg === "object" && "__type" in arg) {
-    if ((arg as internalObject).__type === "macro_opening_tag") {
+    if (arg.__type === "macro_opening_tag") {
       internals.currentMacro = (arg as MacroOpeningTag).instance;
       return internals.currentMacro.hasChildren
         ? internals.currentMacro.enclosing.start
         : "";
     }
 
-    if ((arg as internalObject).__type === "block") {
+    if (arg.__type === "block") {
       if (!internals.currentMacro) {
         console.error("Cannot use block without opening macro");
         return "";
@@ -64,7 +62,7 @@ const transform = (
       return "";
     }
 
-    if ((arg as internalObject).__type === "macro_closing_tag") {
+    if (arg.__type === "macro_closing_tag") {
       if (internals.currentMacro && internals.currentMacro.hasChildren) {
         return internals.currentMacro?.enclosing.end;
       }
@@ -78,13 +76,12 @@ const transform = (
       return template;
     }
     if (
-      arg.__type === "raw_string" 
-    ) return (arg as RawString).value
+      arg.__type === "raw_string"
+    ) return (arg as RawString).value;
     if (
-      (arg as internalObject).__type === "template_string_return_value"
+      arg.__type === "template_string_return_value"
     ) return (arg as TemplateStringReturnValue).toString();
   }
-
 
   return arg as string;
 };
@@ -127,9 +124,9 @@ class Macro<T = unknown> {
   public blocks = new Map<string, TemplateStringReturnValue>();
 
   public helpers: Helpers = {
-    block: (name: string): string | TemplateStringReturnValue => {
+    block: (name: string): null | TemplateStringReturnValue => {
       this.hasBlocks = true;
-      return this.blocks.get(name) ?? `@__block:${name}`;
+      return this.blocks.get(name) ?? null;
     },
     children: () => {
       this.hasChildren = true;
@@ -194,7 +191,10 @@ export const block = (
   content: TemplateStringReturnValue,
 ): Block => ({ name, content, __type: "block" });
 
-export const raw = (value: string): RawString => ({ value, __type: "raw_string"})
+export const raw = (value: string): RawString => ({
+  value,
+  __type: "raw_string",
+});
 
 export const html = (
   strings: TemplateStringsArray,

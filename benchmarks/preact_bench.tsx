@@ -2,7 +2,7 @@
 
 // Naive implementation, as elements will be scaped
 function Layout(
-  { head, children, scripts }: { head: any; children: any; scripts: any },
+  { head, children, scripts }: { head: any; children: any; scripts?: any },
 ) {
   return (
 
@@ -17,7 +17,7 @@ function Layout(
         </head>
         <body>
           {children}
-          {scripts}
+          {scripts ?? <div dangerouslySetInnerHTML={{ __html: "<script>console.log('no block')</script>"}}></div>}
         </body>
       </html>
 
@@ -43,7 +43,6 @@ export default function Page() {
   return (
     <Layout
       head={<title>Home Page</title>}
-      scripts={<script>console.log("hi from home")</script>}
     >
       <h1>Hi</h1>
       <h1>Home page</h1>
