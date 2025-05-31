@@ -1,11 +1,5 @@
 import { html, raw } from "./html.esm.js";
 
-const toNode = (cb) => {
-  const temp = document.createElement("template");
-  temp.innerHTML = cb().string;
-  return temp.content;
-};
-
 const scheduled = new Set();
 
 const on = (event, cb) => {
@@ -51,10 +45,10 @@ class CounterComponent extends HTMLElement {
 
         <button ${on("click", state.inc)}>Inc</button>
       </div>
-    `.string;
+    `.toString();
 
     scheduled.forEach((cb) => cb());
   }
 }
 
-customElements.define("counter-component", CounterComponent);
+customElements.define("counter-macro", CounterComponent);

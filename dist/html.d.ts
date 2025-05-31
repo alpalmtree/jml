@@ -1,31 +1,32 @@
 declare module "src/html" {
+    type objectType = "block" | "macro_opening_tag" | "raw_string" | "macro_closing_tag" | "template_string_return_value";
+    type internalObject = {
+        __type: objectType;
+    };
     type Helpers = {
-        block: (name: string) => string;
+        block: (name: string) => null | TemplateStringReturnValue;
         children: () => string;
     };
-    class MacroOpeningTag<T = unknown> {
+    type MacroOpeningTag<T = unknown> = {
         instance: Macro<T>;
-        constructor(instance: Macro<T>);
-    }
-    class ClosingTag {
-    }
-    export class TemplateStringReturnValue {
-        string: string;
-        constructor(string: string);
-    }
-    class RawString {
+    } & internalObject;
+    type RawString = {
         value: string;
-        constructor(value: string);
-    }
-    class Block {
+    } & internalObject;
+    type ClosingTag = {
+        __type: objectType;
+    };
+    export type TemplateStringReturnValue = {
+        toString: () => string;
+    } & internalObject;
+    type Block = {
         name: string;
         content: TemplateStringReturnValue;
-        constructor(name: string, content: TemplateStringReturnValue);
-    }
+    } & internalObject;
     class Macro<T = unknown> {
         templateFunction: (helpers: Helpers, props?: T) => TemplateStringReturnValue;
-        private props?;
-        template: string;
+        props?: T;
+        template: TemplateStringReturnValue;
         renderString: string;
         enclosing: {
             start: string;
@@ -33,7 +34,7 @@ declare module "src/html" {
         };
         hasBlocks: boolean;
         hasChildren: boolean;
-        blocks: Map<string, string>;
+        blocks: Map<string, TemplateStringReturnValue>;
         helpers: Helpers;
         constructor(templateFunction: (helpers: Helpers, props?: T) => TemplateStringReturnValue, props?: T);
         render(props?: T): RawString;
@@ -43,8 +44,8 @@ declare module "src/html" {
         with(props: T, callback: (macro: Macro<T>) => TemplateStringReturnValue): TemplateStringReturnValue;
     }
     export const macro: <T>(cb: (helpers: Helpers, props?: T) => TemplateStringReturnValue) => Macro<T>;
-    export const raw: (str: string) => RawString;
     export const block: (name: string, content: TemplateStringReturnValue) => Block;
+    export const raw: (value: string) => RawString;
     export const html: (strings: TemplateStringsArray, ...args: unknown[]) => TemplateStringReturnValue;
 }
 declare module "mod" {
