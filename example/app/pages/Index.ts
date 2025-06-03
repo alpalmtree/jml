@@ -1,8 +1,8 @@
-import { html, block, close } from "../../../mod.ts";
+import { block, close, html } from "../../../mod.ts";
 
-import {Layout} from "../macros/Layout.ts";
-import {Card} from "../macros/Card.ts";
-import {Paragraph} from "../macros/Paragraph.ts";
+import { Layout } from "../macros/Layout.ts";
+import { Card } from "../macros/Card.ts";
+import { Paragraph } from "../macros/Paragraph.ts";
 
 export default function Index() {
   // deno-fmt-ignore
@@ -30,4 +30,4 @@ export default function Index() {
     
         `)}
   `
-};
+}

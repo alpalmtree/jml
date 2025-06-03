@@ -12,7 +12,7 @@ export const Layout = macro(({ h }) => {
       </head>
       <body>
         ${h.block("content")} 
-        ${h.block("scripts") || html`<script>console.log("no block content")</script>`}
+        ${h.block("scripts") ?? html`<script>console.log("no block content")</script>`}
       </body>
     </html>
   `;

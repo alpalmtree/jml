@@ -2,8 +2,8 @@
   "tasks": {
     "dev": "cd example/app && deno run -A --watch main.ts",
     "build": "deno run -A _scripts/build.ts && tsc -p _scripts/tsconfig.json",
-    "bench": "deno bench -A benchmarks/bench.ts",
-    "bench:html": "deno bench -A benchmarks/internals/strategies/bench.ts"
+    "build:dev": "deno run -A _scripts/build_dev.ts",
+    "bench": "deno bench -A benchmarks/bench.ts"
   },
   "compilerOptions": {
     "jsx": "react-jsx"
