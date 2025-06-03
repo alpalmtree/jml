@@ -1,6 +1,6 @@
 import { macro, html } from "../../../mod.ts";
 
-export default macro<{ color: string }>((h, props) => {
+export const Card = macro<{ color: string }>(({ h, props }) => {
   return html`
     <div class="card" style="border: 1px solid ${props?.color ?? "red"}">
       ${h.children()}

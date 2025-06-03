@@ -1,6 +1,6 @@
 import { macro, html } from "../../../mod.ts";
 
-export default macro((h) => {
+export const Layout = macro(({ h }) => {
   // deno-fmt-ignore
   return html`
     <!DOCTYPE html>

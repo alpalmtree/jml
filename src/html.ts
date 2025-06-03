@@ -68,8 +68,7 @@ const transform = (
       }
 
       const template = internals.currentMacro!.templateFunction(
-        internals.currentMacro!.helpers,
-        internals.currentMacro!.props,
+        internals.currentMacro!,
       ).toString();
 
       internals.currentMacro = null;
@@ -123,7 +122,7 @@ class Macro<T = unknown> {
 
   public blocks = new Map<string, TemplateStringReturnValue>();
 
-  public helpers: Helpers = {
+  public h: Helpers = {
     block: (name: string): null | TemplateStringReturnValue => {
       this.hasBlocks = true;
       return this.blocks.get(name) ?? null;
@@ -136,30 +135,25 @@ class Macro<T = unknown> {
 
   constructor(
     public templateFunction: (
-      helpers: Helpers,
-      props?: T,
+      instance: Macro<T>,
     ) => TemplateStringReturnValue,
     public props?: T,
   ) {
-    this.template = this.templateFunction(this.helpers, this.props);
+    this.template = this.templateFunction(this);
   }
 
-  public render(props?: T) {
-    const instance = new Macro(this.templateFunction, props);
-    return raw(instance.template.toString());
+  public render() {
+    return raw(this.template.toString());
   }
 
-  public open(props?: T): MacroOpeningTag<T> {
-    const instance = this.props
-      ? this
-      : new Macro(this.templateFunction, props);
+  public open(): MacroOpeningTag<T> {
 
     if (this.hasChildren) {
-      const splitted = instance.template.toString().split("@__children");
-      instance.enclosing.start = splitted.at(0)!;
-      instance.enclosing.end = splitted.at(-1)!;
+      const splitted = this.template.toString().split("@__children");
+      this.enclosing.start = splitted.at(0)!;
+      this.enclosing.end = splitted.at(-1)!;
     }
-    return { instance, __type: "macro_opening_tag" };
+    return { instance: this, __type: "macro_opening_tag" };
   }
   public close(): ClosingTag {
     return { __type: "macro_closing_tag" };
@@ -170,20 +164,12 @@ class Macro<T = unknown> {
     const _args = [this.open(), ...args, this.close()];
     return TemplateStringBuilder(_strings, ..._args);
   }
-
-  public with(
-    props: T,
-    callback: (macro: Macro<T>) => TemplateStringReturnValue,
-  ) {
-    const instance = new Macro(this.templateFunction, props);
-    return callback(instance);
-  }
 }
 
 export const macro = <T>(
-  cb: (helpers: Helpers, props?: T) => TemplateStringReturnValue,
+  cb: (instance: Macro<T>) => TemplateStringReturnValue,
 ) => {
-  return new Macro<T>(cb, undefined);
+  return (props?: T) => new Macro<T>(cb, props);
 };
 
 export const block = (
@@ -202,3 +188,5 @@ export const html = (
 ): TemplateStringReturnValue => {
   return TemplateStringBuilder(strings, ...args);
 };
+
+export const close = () => ({ __type: "macro_closing_tag" })
