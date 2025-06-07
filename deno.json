@@ -3,6 +3,7 @@
     "dev": "cd example/app && deno run -A --watch main.ts",
     "build": "deno run -A _scripts/build.ts && tsc -p _scripts/tsconfig.json",
     "build:dev": "deno run -A _scripts/build_dev.ts",
+    "release": "deno run -A _scripts/release.ts",
     "bench": "deno bench -A benchmarks/bench.ts"
   },
   "compilerOptions": {
