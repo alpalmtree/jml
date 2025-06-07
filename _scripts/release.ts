@@ -34,13 +34,13 @@ const versioningTypes: { [K in ChangeType]: (() => number[]) } = {
 const newVersion = `v${versioningTypes[changeType]().join(".")}`;
 
 const currentVersionFile = Deno.readTextFileSync(
-  `${Deno.cwd()}/scripts/current_version.ts`,
+  `${Deno.cwd()}/_scripts/current_version.ts`,
 );
 const readme = Deno.readTextFileSync(`${Deno.cwd()}/README.md`);
 
 await Promise.all([
   Deno.writeTextFile(
-    `${Deno.cwd()}/scripts/current_version.ts`,
+    `${Deno.cwd()}/_scripts/current_version.ts`,
     currentVersionFile.replace(currentVersion, newVersion),
   ),
   Deno.writeTextFile(
