@@ -6,14 +6,14 @@ This package aims at producing html strings in the server and nothing more. It p
 
 ## Getting started
 ```javascript
-import { html, macro, block, close } from "https://deno.land/x/dhp@v0.0.0"
+import { html, macro, block, close } from "https://deno.land/x/dhp@v0.0.1"
 ```
 > Notice this is Deno only import. We are still working on the distribution on other registries, but for the time being, if you want to use it on either the browser or node, grab the distribution files from the `dist` folder.
 
 ## Example usage
 ```typescript
 // Layout.ts
-import { macro, html } from "https://deno.land/x/dhp@v0.0.0";
+import { macro, html } from "https://deno.land/x/dhp@v0.0.1";
 
 export const Layout = macro(({ h }) => {
   return html`
@@ -33,7 +33,7 @@ export const Layout = macro(({ h }) => {
 });
 
 // page.ts
-import { block, close, html } from "https://deno.land/x/dhp@v0.0.0";
+import { block, close, html } from "https://deno.land/x/dhp@v0.0.1";
 
 import { Layout } from "./Layout.ts";
 
